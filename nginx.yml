@@ -1,0 +1,31 @@
+---
+- name: Install and Configure Nginx Web Server
+  hosts: web_servers
+  become: true
+  
+  tasks:
+    - name: Install Nginx (Debian/Ubuntu)
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+    - name: Install Nginx (RedHat/CentOS)
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
+        update_cache: true
+      when: ansible_os_family == "RedHat"
+
+    - name: Deploy Custom Index HTML Page
+      ansible.builtin.copy:
+        content: "<h1>Deployed via Ansible!</h1>"
+        dest: /var/www/html/index.html
+        mode: '0644'
+
+    - name: Start and Enable Nginx Service
+      ansible.builtin.systemd:
+        name: nginx
+        state: started
+        enabled: true
